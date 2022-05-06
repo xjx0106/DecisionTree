@@ -87,6 +87,7 @@ export default {
     //   };
   },
   methods: {
+    // 自定義節點、邊
     registerFn() {
       const colors = {
         B: "#5B8FF9",
@@ -103,6 +104,7 @@ export default {
         {
           shapeType: "flow-rect",
           draw(cfg, group) {
+            console.log("[draw cfg]->", cfg);
             const {
               name = "",
               variableName,
@@ -289,6 +291,8 @@ export default {
             return rect;
           },
           update(cfg, item) {
+            console.log("[update item]->", item);
+            console.log("[update cfg]->", cfg);
             const { level, status, name } = cfg;
             const group = item.getContainer();
             let mask = group.find((ele) => ele.get("name") === "mask-shape");
@@ -435,6 +439,7 @@ export default {
         "single-line"
       );
     },
+    // 初始化
     initGraph(data) {
       if (!data) {
         return;
@@ -501,7 +506,8 @@ export default {
 
       // 监听画布缩放，缩小到一定程度，节点显示缩略样式
       let currentLevel = 1;
-      const briefZoomThreshold = Math.max(this.graph.getZoom(), 0.5);
+      // const briefZoomThreshold = Math.max(this.graph.getZoom(), 4);
+      const briefZoomThreshold = 0.7;
       this.graph.on("viewportchange", (e) => {
         if (e.action !== "zoom") return;
         const currentZoom = this.graph.getZoom();
@@ -520,25 +526,34 @@ export default {
           });
         }
       });
+      this.graph.on("node:click", (e) => {
+        // const id = e.item._cfg.id;
+        // // const node = this.graph.findById(id);
+        // // console.log("[node]->", node);
+        this.updateNode(e.item);
+      });
+    },
+    updateNode(item) {
+      // console.log("[this.graph]->", this.graph);
+      // let model = item._cfg.model;
+      // model.name = "a";
+      // model.rate = 0.5;
+
+      this.graph.updateItem(item, {
+        name: "a",
+        rate: 0.5,
+      });
+      // item.update(model, null);
+      item.draw();
     },
   },
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+.decision-tree {
+  width: 90vw;
+  height: 900px;
+  border: 1px solid gray;
 }
 </style>
