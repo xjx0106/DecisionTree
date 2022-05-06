@@ -116,26 +116,31 @@ export default {
               collapsed,
               currency,
               status,
-              rate,
             } = cfg;
 
-            const grey = "#CED4D9";
+            /**
+             * 基礎方塊配置
+             */
             const rectConfig = {
               width: 202,
-              height: 60,
+              height: 30,
               lineWidth: 1,
               fontSize: 12,
               fill: "#fff",
               radius: 4,
-              stroke: grey,
+              stroke: "#CED4D9", // grey 基礎方塊的邊框顔色
               opacity: 1,
             };
 
+            /**
+             * X:0,Y:0是rectConfig（基礎方塊）的中心點，所以這個點是基礎方塊的左上角
+             */
             const nodeOrigin = {
               x: -rectConfig.width / 2,
               y: -rectConfig.height / 2,
             };
 
+            // 文字類元素的基礎配置
             const textConfig = {
               textAlign: "left",
               textBaseline: "bottom",
@@ -148,11 +153,13 @@ export default {
                 ...rectConfig,
               },
             });
-
             const rectBBox = rect.getBBox();
+            console.log("[rectBBox]->", rectBBox);
 
-            // label title
-            group.addShape("text", {
+            /**
+             * 大標題元素
+             */
+            const bigTitle = group.addShape("text", {
               attrs: {
                 ...textConfig,
                 x: 12 + nodeOrigin.x,
@@ -166,98 +173,22 @@ export default {
               name: "name-shape",
             });
 
-            // price
-            const price = group.addShape("text", {
+            // 三角形
+            group.addShape("marker", {
               attrs: {
                 ...textConfig,
-                x: 12 + nodeOrigin.x,
-                y: rectBBox.maxY - 12,
-                text: label,
-                fontSize: 16,
-                fill: "#000",
-                opacity: 0.85,
-              },
-            });
-
-            // label currency
-            group.addShape("text", {
-              attrs: {
-                ...textConfig,
-                x: price.getBBox().maxX + 5,
-                y: rectBBox.maxY - 12,
-                text: currency,
-                fontSize: 12,
-                fill: "#000",
-                opacity: 0.75,
-              },
-            });
-
-            // percentage
-            const percentText = group.addShape("text", {
-              attrs: {
-                ...textConfig,
-                x: rectBBox.maxX - 8,
-                y: rectBBox.maxY - 12,
-                text: `${((variableValue || 0) * 100).toFixed(2)}%`,
-                fontSize: 12,
-                textAlign: "right",
-                fill: colors[status],
-              },
-            });
-
-            // percentage triangle
-            const symbol = variableUp ? "triangle" : "triangle-down";
-            const triangle = group.addShape("marker", {
-              attrs: {
-                ...textConfig,
-                x: percentText.getBBox().minX - 10,
-                y: rectBBox.maxY - 12 - 6,
-                symbol,
+                x: nodeOrigin.x,
+                y: bigTitle.getBBox().y,
+                symbol: variableUp ? "triangle" : "triangle-down",
                 r: 6,
                 fill: colors[status],
               },
             });
 
-            // variable name
-            group.addShape("text", {
-              attrs: {
-                ...textConfig,
-                x: triangle.getBBox().minX - 4,
-                y: rectBBox.maxY - 12,
-                text: variableName,
-                fontSize: 12,
-                textAlign: "right",
-                fill: "#000",
-                opacity: 0.45,
-              },
-            });
 
-            // bottom line background
-            const bottomBackRect = group.addShape("rect", {
-              attrs: {
-                x: nodeOrigin.x,
-                y: rectBBox.maxY - 4,
-                width: rectConfig.width,
-                height: 4,
-                radius: [0, 0, rectConfig.radius, rectConfig.radius],
-                fill: "#E0DFE3",
-              },
-            });
-
-            // bottom percent
-            const bottomRect = group.addShape("rect", {
-              attrs: {
-                x: nodeOrigin.x,
-                y: rectBBox.maxY - 4,
-                width: rate * rectBBox.width,
-                height: 4,
-                radius: [0, 0, 0, rectConfig.radius],
-                fill: colors[status],
-              },
-            });
-
-            // collapse rect
+            // 加減號-展開收縮按鈕
             if (cfg.children && cfg.children.length) {
+              // 正方形
               group.addShape("rect", {
                 attrs: {
                   x: rectConfig.width / 2 - 8,
@@ -271,16 +202,16 @@ export default {
                 name: "collapse-back",
                 modelId: cfg.id,
               });
-
-              // collpase text
+              // 加減號
               group.addShape("text", {
                 attrs: {
                   x: rectConfig.width / 2,
-                  y: -1,
+                  y: 1,
                   textAlign: "center",
                   textBaseline: "middle",
                   text: collapsed ? "+" : "-",
                   fontSize: 16,
+                  // fontWeight: "bold",
                   cursor: "pointer",
                   fill: "rgba(0, 0, 0, 0.25)",
                 },
