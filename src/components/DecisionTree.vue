@@ -1,5 +1,7 @@
 <template>
-  <div class="decision-tree" id="container" ref="container"></div>
+  <div class="component-container">
+    <div class="decision-tree" id="container" ref="container"></div>
+  </div>
 </template>
 
 <script>
@@ -550,10 +552,12 @@ export default {
 };
 </script>
 
-<style scoped>
-.decision-tree {
-  width: 90vw;
-  height: 900px;
-  border: 1px solid gray;
+<style scoped lang="scss">
+.component-container {
+  .decision-tree {
+    width: 90vw;
+    height: 900px;
+    border: 1px solid gray;
+  }
 }
 </style>
