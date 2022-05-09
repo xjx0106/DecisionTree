@@ -829,6 +829,7 @@ export default {
         ...config,
         plugins: [tooltip],
       });
+      window.graph = this.graph;
       if (typeof onInit === "function") {
         onInit(this.graph);
       }
