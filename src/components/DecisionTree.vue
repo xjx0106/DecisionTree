@@ -951,7 +951,7 @@ export default {
      */
     graphFitCenter() {
       // 這是由於取消了fitCenter后初始節點的位置變爲(0, 0)（左上角）
-      this.graph.translate(180, 80); // 暫時先移動一點點就好...以後在做調整優化
+      this.graph.translate(140, 80); // 暫時先移動一點點就好...以後在做調整優化
     },
     /**
      * 對話框點擊保存
