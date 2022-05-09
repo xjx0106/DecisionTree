@@ -420,8 +420,8 @@ export default {
                * 參數的標題
                */
               const parameterTitle = group.addShape("text", {
-              attrs: {
-                ...textConfig,
+                attrs: {
+                  ...textConfig,
                   x: 13 + nodeOrigin.x,
                   y: nodeOrigin.y + 16,
                   text:
@@ -433,10 +433,10 @@ export default {
                   textBaseline: "middle",
                   opacity: 0.9,
                   fill: "#188cff",
-                cursor: "pointer",
-              },
-              name: "name-element",
-            });
+                  cursor: "pointer",
+                },
+                name: "name-element",
+              });
             } else if (decisionType === "compare") {
               // 條件
 
@@ -628,7 +628,7 @@ export default {
           update(cfg, item) {
             console.log("[update]->", "cfg", cfg, "item", item);
 
-            const { level, status, name } = cfg;
+            const { level, status, name, decisionType, decisionData } = cfg;
             const group = item.getContainer();
             let mask = group.find((ele) => ele.get("name") === "mask-shape");
             let maskLabel = group.find(
@@ -642,15 +642,46 @@ export default {
               // 如果不存在蒙版組件的情況
               if (!mask) {
                 // 添加上蒙版（縮略的時候展示）
+                let maskColor = "";
+                let maskContent = "no content";
+                if (decisionType === "parameter") {
+                  maskColor = "#188cff";
+                  maskContent = decisionData.parameter.value;
+                } else if (decisionType === "compare") {
+                  maskColor = "#67C23A";
+                  let method = "";
+                  const methodItem = compareList.find(
+                    (cp) => cp.value === decisionData.compare.method
+                  );
+                  if (methodItem) {
+                    method = methodItem.label;
+                  } else {
+                    method = "method not found";
+                  }
+
+                  maskContent = method + " " + decisionData.compare.value;
+                } else if (decisionType === "action") {
+                  maskColor = "#E6A23C";
+                  const actionItem = actionList.find(
+                    (ac) => ac.value === decisionData.action.value
+                  );
+                  if (actionItem) {
+                    maskContent = actionItem.label;
+                  } else {
+                    maskContent = "action not found";
+                  }
+                } else {
+                  maskColor = "gray";
+                }
                 mask = group.addShape("rect", {
                   attrs: {
-                    x: -101,
+                    x: -95,
                     y: -30 + 15,
-                    width: 202,
+                    width: 190,
                     height: 30, // 60,
                     opacity: 0,
-                    fill: colors[status],
-                    radius: 8,
+                    fill: maskColor,
+                    radius: 5,
                   },
                   name: "mask-shape",
                 });
@@ -660,8 +691,11 @@ export default {
                     fill: "#fff",
                     fontSize: 20,
                     x: 0,
-                    y: 10,
-                    text: name.length > 13 ? name.substr(0, 13) + "..." : name,
+                    y: 11,
+                    text:
+                      maskContent.length > 13
+                        ? maskContent.substr(0, 13) + "..."
+                        : maskContent,
                     textAlign: "center",
                     opacity: 0,
                   },
@@ -673,11 +707,26 @@ export default {
                 const collapseText = group.find(
                   (ele) => ele.get("name") === "collapse-text"
                 );
-                collapseRect?.toFront();
-                collapseText?.toFront();
+                // collapseText?.toFront();
+                // collapseText?.toFront();
+
+                collapseRect?.hide();
+                collapseText?.hide();
               } else {
                 mask.show();
                 maskLabel.show();
+
+                const collapseRect = group.find(
+                  (ele) => ele.get("name") === "collapse-back"
+                );
+                const collapseText = group.find(
+                  (ele) => ele.get("name") === "collapse-text"
+                );
+                // collapseText?.toFront();
+                // collapseText?.toFront();
+
+                collapseRect?.hide();
+                collapseText?.hide();
               }
               mask.animate({ opacity: 1 }, 150);
               maskLabel.animate({ opacity: 1 }, 150);
@@ -687,6 +736,7 @@ export default {
                 if (child.get("name")?.includes("collapse")) return;
                 child.show();
               });
+
               mask?.animate(
                 { opacity: 0 },
                 {
@@ -701,6 +751,17 @@ export default {
                   callback: () => maskLabel.hide(),
                 }
               );
+
+              const collapseRect = group.find(
+                (ele) => ele.get("name") === "collapse-back"
+              );
+              const collapseText = group.find(
+                (ele) => ele.get("name") === "collapse-text"
+              );
+              // collapseRect?.toFront();
+              // collapseText?.toFront();
+              collapseRect?.show();
+              collapseText?.show();
             }
 
             // let nameLabel = group.find((ele) => ele.get("name") === "name-element");
@@ -881,7 +942,7 @@ export default {
           case "action":
             this.operateDialogData.action = {
               value: model.decisionData.action.value,
-        };
+            };
             break;
         }
       });
@@ -980,14 +1041,14 @@ export default {
 
         this.graph.addChild(newNode, fatherNode);
       } else if (this.operateDialogData.dialogTitle === "编辑") {
-      const nodes = this.graph.getNodes();
+        const nodes = this.graph.getNodes();
         const node = nodes.find((n) => n._cfg.id === currentId);
-      if (node) {
-        this.graph.updateItem(node, {
+        if (node) {
+          this.graph.updateItem(node, {
             decisionType: _decisionType,
             decisionData: _decisionData,
-        });
-      node.draw();
+          });
+          node.draw();
         }
       }
 
