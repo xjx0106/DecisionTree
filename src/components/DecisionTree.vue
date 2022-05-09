@@ -5,25 +5,170 @@
       id="treeGraphContainer"
       ref="treeGraphContainer"
     ></div>
+    <!-- 新增/編輯對話框 -->
     <el-dialog
-      title="详细信息"
-      :visible.sync="detailDialogVisible"
+      :title="operateDialogData.dialogTitle"
+      :visible.sync="operateDialogVisible"
       width="500"
       class="detail-dialog"
       :close-on-click-modal="false"
     >
       <div class="detail-dialog-content">
-        id
-        <el-input
-          v-model="detailDialogData.id"
-          placeholder="id"
-          :disabled="true"
-        ></el-input>
-        name
-        <el-input v-model="detailDialogData.name" placeholder="name"></el-input>
+        <el-form ref="form" :model="operateDialogData" label-width="80px">
+          <el-form-item label="节点类型">
+            <el-radio-group v-model="operateDialogData.decisionType">
+              <el-radio-button label="parameter">参数节点</el-radio-button>
+              <el-radio-button label="compare">对比节点</el-radio-button>
+              <el-radio-button label="action">动作节点</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+
+          <!-- 參數類型的節點 -->
+          <div v-if="operateDialogData.decisionType === 'parameter'">
+            <el-form-item label="参数类型">
+              <el-select
+                v-model="operateDialogData.parameter.valueType"
+                placeholder="请选择参数类型"
+              >
+                <el-option
+                  v-for="item in valueTypeList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <!-- 各種類型的參數 -->
+            <el-form-item
+              label="变量值"
+              v-if="operateDialogData.parameter.valueType === 'variable'"
+            >
+              <el-select
+                v-model="operateDialogData.parameter.value"
+                placeholder="请选择变量"
+              >
+                <el-option
+                  v-for="item in variableList"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              label="输入值"
+              v-if="operateDialogData.parameter.valueType === 'input'"
+            >
+              <el-input v-model="operateDialogData.parameter.value"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="常量"
+              v-if="operateDialogData.parameter.valueType === 'constant'"
+            >
+              <el-select
+                v-model="operateDialogData.parameter.value"
+                placeholder="请选择常量"
+              >
+                <el-option
+                  v-for="item in constantList"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+              /></el-select>
+            </el-form-item>
+          </div>
+
+          <!-- 比較類型的節點 -->
+          <div v-if="operateDialogData.decisionType === 'compare'">
+            <el-form-item label="比较符">
+              <el-select
+                v-model="operateDialogData.compare.method"
+                placeholder="请选择比较符"
+              >
+                <el-option
+                  v-for="item in compareList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="参数类型">
+              <el-select
+                v-model="operateDialogData.compare.valueType"
+                placeholder="请选择参数类型"
+              >
+                <el-option
+                  v-for="item in valueTypeList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <!-- 各種類型的參數 -->
+            <el-form-item
+              label="变量值"
+              v-if="operateDialogData.compare.valueType === 'variable'"
+            >
+              <el-select
+                v-model="operateDialogData.compare.value"
+                placeholder="请选择变量"
+              >
+                <el-option
+                  v-for="item in variableList"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              label="输入值"
+              v-if="operateDialogData.compare.valueType === 'input'"
+            >
+              <el-input v-model="operateDialogData.compare.value"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="常量"
+              v-if="operateDialogData.compare.valueType === 'constant'"
+            >
+              <el-select
+                v-model="operateDialogData.compare.value"
+                placeholder="请选择常量"
+              >
+                <el-option
+                  v-for="item in constantList"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+              /></el-select>
+            </el-form-item>
+          </div>
+
+          <!-- 動作類型的節點 -->
+          <div v-if="operateDialogData.decisionType === 'action'">
+            <el-form-item label="动作">
+              <el-select
+                v-model="operateDialogData.action.value"
+                placeholder="请选择动作"
+              >
+                <el-option
+                  v-for="item in actionList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </div>
+        </el-form>
       </div>
       <div slot="footer">
-        <el-button @click="detailDialogVisible = false">取 消</el-button>
+        <el-button @click="operateDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="saveDetail">确 定</el-button>
       </div>
     </el-dialog>
@@ -32,10 +177,15 @@
 
 <script>
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-debugger */
+
 import G6 from "@antv/g6";
 import insertCss from "insert-css";
 
 import mockData from "./mockData.js";
+import mockData2 from "./mockData2.js";
+
+import { uuid } from "./../utils/index.js";
 
 export default {
   name: "DecisionTree",
@@ -45,7 +195,7 @@ export default {
       graph: null,
       defaultConfig: {
         width: 1200,
-        height: 900,
+        height: 800,
         modes: {
           default: ["zoom-canvas", "drag-canvas"],
         },
@@ -64,14 +214,13 @@ export default {
           type: "indented",
           direction: "LR",
           dropCap: false, // 子節點在父節點的下一行
-          indent: 250, // 左右兩個節點之間的距離（橫向的）
+          indent: 220, // 左右兩個節點之間的距離（橫向的）
           getHeight: () => {
             return 0;
           }, // 上下兩個節點之間的距離（竪向的）
         },
       },
       props: {
-        // data: mockData,
         config: {
           padding: [20, 50],
           defaultLevel: 3,
@@ -80,11 +229,55 @@ export default {
         },
       },
       // 對話框相關的數據
-      detailDialogVisible: false,
-      detailDialogData: {
-        id: "",
-        name: "",
+      operateDialogVisible: false,
+      operateDialogData: {
+        dialogTitle: "新增",
+        id: "", // 編輯時：那個節點的id；新增時：父親節點的id
+        decisionType: "", // parameter, compare, action
+        parameter: {
+          // 參數類型的節點
+          valueType: "", // 參數的類型(variable/input/constant)
+          value: null, // 參數的值
+        },
+        compare: {
+          // 比較類型的節點
+          method: "", // 比較操作符("bigger")
+          valueType: "", // 參數的類型(variable/input/constant)
+          value: null, // 參數的值
+        },
+        action: {
+          // 動作類型的節點
+          value: "",
+        },
       },
+      // 比較操作符的列表
+      compareList: [
+        { value: "bigger", label: "＞" },
+        { value: "bigger_equal", label: "＞=" },
+        { value: "equal", label: "=" },
+        { value: "smaller", label: "＜" },
+        { value: "smaller_equal", label: "＜=" },
+        { value: "not_equal", label: "!=" },
+      ],
+      // 值類型的列表
+      valueTypeList: [
+        { value: "variable", label: "变量" },
+        { value: "input", label: "输入值" },
+        { value: "constant", label: "常量" },
+      ],
+      // 變量的列表
+      variableList: ["姓名", "年龄", "月收入", "年收入", "性别"],
+      // 常量的列表
+      constantList: ["普通额度10万", "税率10%"],
+      // 動作的列表
+      actionList: [
+        { label: "禁止", value: "action1" },
+        { label: "禁用", value: "action2" },
+        { label: "删除", value: "action3" },
+        { label: "标记为高风险", value: "action4" },
+      ],
+      // 三種節點的類型
+      // parameter/compare/action
     };
   },
   created() {
@@ -100,10 +293,11 @@ export default {
     `);
   },
   watch: {
-    detailDialogVisible: {
+    operateDialogVisible: {
       handler(val) {
         if (!val) {
-          ({ detailDialogData: this.detailDialogData } = this.$options.data());
+          ({ operateDialogData: this.operateDialogData } =
+            this.$options.data());
         }
       },
     },
@@ -115,9 +309,9 @@ export default {
     const width = tgContainer.scrollWidth;
     // const height = tgContainer.scrollHeight || 500;
     this.defaultConfig.width = width;
-    this.defaultConfig.height = 900;
+    this.defaultConfig.height = 800;
 
-    this.initGraph(mockData);
+    this.initGraph(mockData2);
 
     // if (typeof window !== "undefined")
     //   window.onresize = () => {
@@ -142,6 +336,9 @@ export default {
         G: "#5BD8A6",
         DI: "#A7A7A7",
       };
+
+      const compareList = this.compareList;
+      const actionList = this.actionList;
       /**
        * 自定義節點
        */
@@ -151,21 +348,17 @@ export default {
           shapeType: "flow-rect",
           draw(cfg, group) {
             const {
-              name = "",
-              variableName,
-              variableValue,
-              variableUp,
-              label,
+              id,
               collapsed,
-              currency,
-              status,
+              decisionType, // 決策節點類型: parameter/compare/action
+              decisionData, // 決策節點的值
             } = cfg;
 
             /**
              * 基礎方塊配置
              */
             const rectConfig = {
-              width: 202,
+              width: 185,
               height: 30,
               lineWidth: 1,
               fontSize: 12,
@@ -201,19 +394,134 @@ export default {
             /**
              * 大標題
              */
-            const bigTitle = group.addShape("text", {
+            // const nameShow = decisionData.value || "";
+            // const bigTitle = group.addShape("text", {
+            //   attrs: {
+            //     ...textConfig,
+            //     x: 18 + nodeOrigin.x,
+            //     y: 22 + nodeOrigin.y,
+            //     text:
+            //       nameShow.length > 20
+            //         ? nameShow.substr(0, 20) + "..."
+            //         : nameShow,
+            //     fontSize: 12,
+            //     opacity: 0.85,
+            //     fill: "#000",
+            //     cursor: "pointer",
+            //   },
+            //   name: "name-element",
+            // });
+
+            if (decisionType === "parameter") {
+              // 參數
+
+              const nameShow = decisionData.parameter.value || "";
+              /**
+               * 參數的標題
+               */
+              const parameterTitle = group.addShape("text", {
               attrs: {
                 ...textConfig,
-                x: 18 + nodeOrigin.x,
-                y: 22 + nodeOrigin.y,
-                text: name.length > 20 ? name.substr(0, 20) + "..." : name,
-                fontSize: 12,
-                opacity: 0.85,
-                fill: "#000",
+                  x: 13 + nodeOrigin.x,
+                  y: nodeOrigin.y + 16,
+                  text:
+                    nameShow.length > 20
+                      ? nameShow.substr(0, 20) + "..."
+                      : nameShow,
+                  fontSize: 14,
+                  fontWeight: "Bold",
+                  textBaseline: "middle",
+                  opacity: 0.9,
+                  fill: "#188cff",
                 cursor: "pointer",
               },
               name: "name-element",
             });
+            } else if (decisionType === "compare") {
+              // 條件
+
+              const conObj = compareList.find(
+                (liI) => liI.value === decisionData.compare.method // "bigger"
+              );
+              let conMarkShow = "no compare mark";
+              if (conObj) {
+                conMarkShow = conObj.label;
+              }
+              /**
+               * 條件的比較符
+               */
+              const condition = group.addShape("text", {
+                attrs: {
+                  ...textConfig,
+                  x: 7 + nodeOrigin.x,
+                  y: nodeOrigin.y + 16,
+                  text:
+                    conMarkShow.length > 20
+                      ? conMarkShow.substr(0, 20) + "..."
+                      : conMarkShow,
+                  fontSize: 14,
+                  textBaseline: "middle",
+                  fontWeight: "Bold",
+                  opacity: 0.9,
+                  fill: "#F56C6C",
+                  cursor: "pointer",
+                },
+                // name: "name-element",
+              });
+
+              /**
+               * 條件的比較内容
+               */
+              const comparisonValue = group.addShape("text", {
+                attrs: {
+                  ...textConfig,
+                  x: 40 + nodeOrigin.x,
+                  y: nodeOrigin.y + 16,
+                  text:
+                    decisionData.compare.value.length > 20
+                      ? decisionData.compare.value.substr(0, 20) + "..."
+                      : decisionData.compare.value,
+                  fontSize: 14,
+                  textBaseline: "middle",
+                  fontWeight: "Bold",
+                  opacity: 0.9,
+                  fill: "#67C23A",
+                  cursor: "pointer",
+                },
+                // name: "name-element",
+              });
+            } else if (decisionType === "action") {
+              // 動作
+              /**
+               * 動作的名字
+               */
+              let nameShow = "no action name";
+              const actionValue = decisionData.action.value || "";
+              const actionItem = actionList.find(
+                (ac) => ac.value === actionValue
+              );
+              if (actionItem) {
+                nameShow = actionItem.label;
+              }
+              const actionName = group.addShape("text", {
+                attrs: {
+                  ...textConfig,
+                  x: 13 + nodeOrigin.x,
+                  y: nodeOrigin.y + 16,
+                  text:
+                    nameShow.length > 20
+                      ? nameShow.substr(0, 20) + "..."
+                      : nameShow,
+                  fontSize: 14,
+                  fontWeight: "Bold",
+                  textBaseline: "middle",
+                  opacity: 0.9,
+                  fill: "#E6A23C",
+                  cursor: "pointer",
+                },
+                name: "action-element",
+              });
+            }
 
             // 設置齒輪按鈕
             group.addShape("image", {
@@ -223,7 +531,7 @@ export default {
                 height: 16.6,
                 fontSize: 12,
                 img: require("../assets/image/setting.svg"),
-                x: -nodeOrigin.x - 16.6 - 12,
+                x: 110 + nodeOrigin.x,
                 y: nodeOrigin.y + 6.3,
                 cursor: "pointer",
                 opacity: 0.4,
@@ -231,17 +539,49 @@ export default {
               name: "setting-element",
             });
 
-            // 三角形
-            group.addShape("marker", {
+            // 設置新增按鈕
+            group.addShape("image", {
               attrs: {
                 ...textConfig,
-                x: nodeOrigin.x + 10,
-                y: bigTitle.getBBox().y + 4,
-                symbol: variableUp ? "triangle" : "triangle-down",
-                r: 6,
-                fill: colors[status],
+                width: 20.6,
+                height: 20.6,
+                fontSize: 12,
+                img: require("../assets/image/add.svg"),
+                x: 130 + nodeOrigin.x,
+                y: nodeOrigin.y + 4.3,
+                cursor: "pointer",
+                opacity: 1,
               },
+              name: "add-element",
             });
+
+            // 設置刪除按鈕
+            group.addShape("image", {
+              attrs: {
+                ...textConfig,
+                width: 20.6,
+                height: 20.6,
+                fontSize: 12,
+                img: require("../assets/image/close.svg"),
+                x: 150 + nodeOrigin.x,
+                y: nodeOrigin.y + 4,
+                cursor: id === "g1" ? "default" : "pointer",
+                opacity: id === "g1" ? 0 : 1,
+              },
+              name: "delete-element",
+            });
+
+            // // 三角形
+            // group.addShape("marker", {
+            //   attrs: {
+            //     ...textConfig,
+            //     x: nodeOrigin.x + 10,
+            //     y: bigTitle.getBBox().y + 4,
+            //     symbol: variableUp ? "triangle" : "triangle-down",
+            //     r: 6,
+            //     fill: colors[status],
+            //   },
+            // });
 
             // 加減號-展開收縮按鈕
             if (cfg.children && cfg.children.length) {
@@ -517,12 +857,58 @@ export default {
       });
       // 設置icon被點擊時
       this.graph.on("setting-element:click", (e) => {
-        this.detailDialogVisible = true;
         // 朝對話框賦值
-        this.detailDialogData = {
-          id: e.item._cfg.model.id,
-          name: e.item._cfg.model.name,
+        this.operateDialogData.dialogTitle = "编辑";
+        this.operateDialogVisible = true;
+        const { model } = e.item._cfg;
+        this.operateDialogData.id = model.id;
+        this.operateDialogData.decisionType = model.decisionType;
+        switch (e.item._cfg.model.decisionType) {
+          case "parameter":
+            this.operateDialogData.parameter = {
+              valueType: model.decisionData.parameter.valueType,
+              value: model.decisionData.parameter.value,
+            };
+            break;
+          case "compare":
+            this.operateDialogData.compare = {
+              method: model.decisionData.compare.method,
+              valueType: model.decisionData.compare.valueType,
+              value: model.decisionData.compare.value,
+            };
+            break;
+          case "action":
+            this.operateDialogData.action = {
+              value: model.decisionData.action.value,
         };
+            break;
+        }
+      });
+      // 添加的icon被點擊時
+      this.graph.on("add-element:click", (e) => {
+        // 朝對話框賦值
+        this.operateDialogData.dialogTitle = "新增";
+        const { model } = e.item._cfg;
+        this.operateDialogData.id = model.id;
+        this.operateDialogVisible = true;
+      });
+      // 刪除的icon被點擊時
+      this.graph.on("delete-element:click", (e) => {
+        const { model } = e.item._cfg;
+        console.log("[model]->", model);
+        const item = this.graph.findById(model.id);
+        this.graph.removeChild(model.id);
+        this.graph.getNodes().forEach((m) => {
+          m.draw();
+        });
+
+        // setTimeout(() => {
+        //   const node = this.graph.findById(model.id);
+        //   if(node) {
+        //     this.graph.removeItem(node);
+        //     this.graph.refresh();
+        //   }
+        // }, 1000);
       });
 
       // 监听画布缩放，缩小到一定程度，节点显示缩略样式
@@ -571,15 +957,41 @@ export default {
      * 對話框點擊保存
      */
     saveDetail() {
+      const _decisionType = this.operateDialogData.decisionType; // parameter, compare, action
+      const _decisionData = {
+        parameter: this.operateDialogData.parameter, // { value, valueType }
+        compare: this.operateDialogData.compare,
+        action: this.operateDialogData.action,
+      };
+
+      const currentId = this.operateDialogData.id;
+
+      if (this.operateDialogData.dialogTitle === "新增") {
+        const fatherNode = this.graph.findById(currentId);
+        const newId = uuid();
+        const newNode = {
+          id: newId,
+          name: "new",
+          children: [],
+          decisionType: _decisionType,
+          decisionData: _decisionData,
+        };
+
+        this.graph.addChild(newNode, fatherNode);
+      } else if (this.operateDialogData.dialogTitle === "编辑") {
       const nodes = this.graph.getNodes();
-      const node = nodes.find((n) => n._cfg.id === this.detailDialogData.id);
+        const node = nodes.find((n) => n._cfg.id === currentId);
       if (node) {
         this.graph.updateItem(node, {
-          name: this.detailDialogData.name,
+            decisionType: _decisionType,
+            decisionData: _decisionData,
         });
-      }
-      this.detailDialogVisible = false;
       node.draw();
+        }
+      }
+
+      this.operateDialogVisible = false;
+
       // this.graph.updateItem(item, {
       //   name: "a",
       //   rate: 0.5,
@@ -593,10 +1005,12 @@ export default {
 
 <style scoped lang="scss">
 .component-container {
+  padding: 10px 0px 0px 10px;
   .decision-tree {
     width: 90vw;
-    height: 900px;
-    border: 1px solid gray;
+    height: 800px;
+    border: 1px solid rgb(0, 145, 255);
+    border-radius: 6px;
   }
   .detail-dialog {
     .detail-dialog-content {
