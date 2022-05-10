@@ -9,7 +9,7 @@
     <el-dialog
       :title="operateDialogData.dialogTitle"
       :visible.sync="operateDialogVisible"
-      width="500"
+      width="500px"
       class="detail-dialog"
       :close-on-click-modal="false"
     >
@@ -254,7 +254,7 @@ export default {
       compareList: [
         { value: "bigger", label: "＞" },
         { value: "bigger_equal", label: "＞=" },
-        { value: "equal", label: "=" },
+        { value: "equal", label: "==" },
         { value: "smaller", label: "＜" },
         { value: "smaller_equal", label: "＜=" },
         { value: "not_equal", label: "!=" },
@@ -268,13 +268,18 @@ export default {
       // 變量的列表
       variableList: ["姓名", "年龄", "月收入", "年收入", "性别"],
       // 常量的列表
-      constantList: ["普通额度10万", "税率10%"],
+      constantList: ["普通额度10万", "税率10%", "老年人年龄界限", "法定成年"],
       // 動作的列表
       actionList: [
-        { label: "禁止", value: "action1" },
-        { label: "禁用", value: "action2" },
-        { label: "删除", value: "action3" },
-        { label: "标记为高风险", value: "action4" },
+        { label: "禁止", value: "forbid" },
+        { label: "禁用", value: "ban" },
+        { label: "删除", value: "delete" },
+        { label: "标记为高风险", value: "high_risk" },
+        { label: "标记为种风险", value: "middle_risk" },
+        { label: "标记为低风险", value: "low_risk" },
+        { label: "继续", value: "go_on" },
+        { label: "通过审批", value: "pass" },
+        { label: "驳回审批", value: "reject" }
       ],
       // 三種節點的類型
       // parameter/compare/action
@@ -466,7 +471,7 @@ export default {
                   fill: "#F56C6C",
                   cursor: "pointer",
                 },
-                // name: "name-element",
+                name: "name-element",
               });
 
               /**
@@ -488,7 +493,7 @@ export default {
                   fill: "#67C23A",
                   cursor: "pointer",
                 },
-                // name: "name-element",
+                name: "name-element",
               });
             } else if (decisionType === "action") {
               // 動作
@@ -878,7 +883,8 @@ export default {
         shouldBegin: (e) => {
           if (
             e.target.get("name") === "name-element" ||
-            e.target.get("name") === "mask-label-shape"
+            e.target.get("name") === "mask-label-shape" ||
+            e.target.get("name") === "action-element"
           )
             return true;
           return false;
@@ -1033,7 +1039,7 @@ export default {
         const newId = uuid();
         const newNode = {
           id: newId,
-          name: "new",
+          name: "动作节点",
           children: [],
           decisionType: _decisionType,
           decisionData: _decisionData,
