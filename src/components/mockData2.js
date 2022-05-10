@@ -1,6 +1,6 @@
 const mockData = {
   id: "g1",
-  name: "变量",
+  name: "参数",
   decisionType: "parameter", // 變量
   decisionData: {
     parameter: {
@@ -11,7 +11,7 @@ const mockData = {
   children: [
     {
       id: "g12",
-      name: "条件",
+      name: "对比",
       decisionType: "compare", // 條件
       decisionData: {
         compare: {
@@ -23,7 +23,7 @@ const mockData = {
       children: [
         {
           id: "g121",
-          name: "变量",
+          name: "参数",
           collapsed: true,
           decisionType: "parameter", // 變量
           decisionData: {
@@ -35,8 +35,8 @@ const mockData = {
           children: [
             {
               id: "g1211",
-              name: "变量",
-              decisionType: "compare", // 變量
+              name: "对比",
+              decisionType: "compare",
               decisionData: {
                 compare: {
                   method: "smaller",
@@ -60,8 +60,8 @@ const mockData = {
             },
             {
               id: "g1212",
-              name: "变量",
-              decisionType: "compare", // 變量
+              name: "对比",
+              decisionType: "compare",
               decisionData: {
                 compare: {
                   method: "smaller",
@@ -72,8 +72,8 @@ const mockData = {
               children: [
                 {
                   id: "g12121",
-                  name: "变量",
-                  decisionType: "compare", // 變量
+                  name: "对比",
+                  decisionType: "compare",
                   decisionData: {
                     compare: {
                       method: "bigger_equal",
@@ -85,7 +85,7 @@ const mockData = {
                     {
                       id: "g121211",
                       name: "动作",
-                      decisionType: "action", // 动作
+                      decisionType: "action",
                       decisionData: {
                         action: {
                           value: "reject",
@@ -99,8 +99,8 @@ const mockData = {
             },
             {
               id: "g1213",
-              name: "变量",
-              decisionType: "compare", // 變量
+              name: "对比",
+              decisionType: "compare",
               decisionData: {
                 compare: {
                   method: "bigger_equal",
@@ -126,7 +126,7 @@ const mockData = {
         },
         {
           id: "g122",
-          name: "变量",
+          name: "参数",
           collapsed: true,
           decisionType: "parameter", // 變量
           decisionData: {
@@ -190,7 +190,7 @@ const mockData = {
     },
     {
       id: "g11",
-      name: "条件",
+      name: "对比",
       decisionType: "compare", // 條件
       decisionData: {
         compare: {
