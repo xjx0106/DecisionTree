@@ -1082,9 +1082,24 @@ export default {
       if (this.operateDialogData.dialogTitle === "新增") {
         const fatherNode = this.graph.findById(currentId);
         const newId = uuid();
+        let tooltip = "";
+        switch (_decisionType) {
+          case "parameter":
+            tooltip = "参数";
+            break;
+          case "compare":
+            tooltip = "对比";
+            break;
+          case "action":
+            tooltip = "动作";
+            break;
+          default:
+            tooltip = "--";
+            break;
+        }
         const newNode = {
           id: newId,
-          name: "动作节点",
+          name: tooltip,
           children: [],
           decisionType: _decisionType,
           decisionData: _decisionData,
