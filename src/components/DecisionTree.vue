@@ -9,14 +9,18 @@
     <el-dialog
       :title="operateDialogData.dialogTitle"
       :visible.sync="operateDialogVisible"
-      width="500"
+      width="500px"
       class="detail-dialog"
       :close-on-click-modal="false"
     >
       <div class="detail-dialog-content">
         <el-form ref="form" :model="operateDialogData" label-width="80px">
+          <!-- 節點類型 -->
           <el-form-item label="节点类型">
-            <el-radio-group v-model="operateDialogData.decisionType">
+            <el-radio-group
+              v-model="operateDialogData.decisionType"
+              :fill="radioColor"
+            >
               <el-radio-button label="parameter">参数节点</el-radio-button>
               <el-radio-button label="compare">对比节点</el-radio-button>
               <el-radio-button label="action">动作节点</el-radio-button>
@@ -29,6 +33,8 @@
               <el-select
                 v-model="operateDialogData.parameter.valueType"
                 placeholder="请选择参数类型"
+                @change="changeDataType('parameter')"
+                clearable
               >
                 <el-option
                   v-for="item in valueTypeList"
@@ -47,6 +53,7 @@
               <el-select
                 v-model="operateDialogData.parameter.value"
                 placeholder="请选择变量"
+                clearable
               >
                 <el-option
                   v-for="item in variableList"
@@ -60,7 +67,11 @@
               label="输入值"
               v-if="operateDialogData.parameter.valueType === 'input'"
             >
-              <el-input v-model="operateDialogData.parameter.value"></el-input>
+              <el-input
+                clearable
+                v-model="operateDialogData.parameter.value"
+                style="width: 250px"
+              ></el-input>
             </el-form-item>
             <el-form-item
               label="常量"
@@ -69,6 +80,7 @@
               <el-select
                 v-model="operateDialogData.parameter.value"
                 placeholder="请选择常量"
+                clearable
               >
                 <el-option
                   v-for="item in constantList"
@@ -85,6 +97,7 @@
               <el-select
                 v-model="operateDialogData.compare.method"
                 placeholder="请选择比较符"
+                clearable
               >
                 <el-option
                   v-for="item in compareList"
@@ -99,6 +112,8 @@
               <el-select
                 v-model="operateDialogData.compare.valueType"
                 placeholder="请选择参数类型"
+                clearable
+                @change="changeDataType('compare')"
               >
                 <el-option
                   v-for="item in valueTypeList"
@@ -116,6 +131,7 @@
             >
               <el-select
                 v-model="operateDialogData.compare.value"
+                clearable
                 placeholder="请选择变量"
               >
                 <el-option
@@ -130,7 +146,11 @@
               label="输入值"
               v-if="operateDialogData.compare.valueType === 'input'"
             >
-              <el-input v-model="operateDialogData.compare.value"></el-input>
+              <el-input
+                clearable
+                style="width: 250px"
+                v-model="operateDialogData.compare.value"
+              ></el-input>
             </el-form-item>
             <el-form-item
               label="常量"
@@ -139,6 +159,7 @@
               <el-select
                 v-model="operateDialogData.compare.value"
                 placeholder="请选择常量"
+                clearable
               >
                 <el-option
                   v-for="item in constantList"
@@ -155,6 +176,7 @@
               <el-select
                 v-model="operateDialogData.action.value"
                 placeholder="请选择动作"
+                clearable
               >
                 <el-option
                   v-for="item in actionList"
@@ -254,7 +276,7 @@ export default {
       compareList: [
         { value: "bigger", label: "＞" },
         { value: "bigger_equal", label: "＞=" },
-        { value: "equal", label: "=" },
+        { value: "equal", label: "==" },
         { value: "smaller", label: "＜" },
         { value: "smaller_equal", label: "＜=" },
         { value: "not_equal", label: "!=" },
@@ -268,13 +290,18 @@ export default {
       // 變量的列表
       variableList: ["姓名", "年龄", "月收入", "年收入", "性别"],
       // 常量的列表
-      constantList: ["普通额度10万", "税率10%"],
+      constantList: ["普通额度10万", "税率10%", "老年人年龄界限", "法定成年"],
       // 動作的列表
       actionList: [
-        { label: "禁止", value: "action1" },
-        { label: "禁用", value: "action2" },
-        { label: "删除", value: "action3" },
-        { label: "标记为高风险", value: "action4" },
+        { label: "禁止", value: "forbid" },
+        { label: "禁用", value: "ban" },
+        { label: "删除", value: "delete" },
+        { label: "标记为高风险", value: "high_risk" },
+        { label: "标记为种风险", value: "middle_risk" },
+        { label: "标记为低风险", value: "low_risk" },
+        { label: "继续", value: "go_on" },
+        { label: "通过审批", value: "pass" },
+        { label: "驳回审批", value: "reject" },
       ],
       // 三種節點的類型
       // parameter/compare/action
@@ -300,6 +327,29 @@ export default {
             this.$options.data());
         }
       },
+    },
+  },
+  computed: {
+    /**
+     * 計算新增窗口中的“節點類型選擇組件”的顔色
+     */
+    radioColor() {
+      let color = "";
+      switch (this.operateDialogData.decisionType) {
+        case "parameter":
+          color = "#188cff";
+          break;
+        case "compare":
+          color = "#67C23A";
+          break;
+        case "action":
+          color = "orange";
+          break;
+        default:
+          color = "gray";
+          break;
+      }
+      return color;
     },
   },
   mounted() {
@@ -466,7 +516,7 @@ export default {
                   fill: "#F56C6C",
                   cursor: "pointer",
                 },
-                // name: "name-element",
+                name: "name-element",
               });
 
               /**
@@ -488,7 +538,7 @@ export default {
                   fill: "#67C23A",
                   cursor: "pointer",
                 },
-                // name: "name-element",
+                name: "name-element",
               });
             } else if (decisionType === "action") {
               // 動作
@@ -878,7 +928,8 @@ export default {
         shouldBegin: (e) => {
           if (
             e.target.get("name") === "name-element" ||
-            e.target.get("name") === "mask-label-shape"
+            e.target.get("name") === "mask-label-shape" ||
+            e.target.get("name") === "action-element"
           )
             return true;
           return false;
@@ -1033,7 +1084,7 @@ export default {
         const newId = uuid();
         const newNode = {
           id: newId,
-          name: "new",
+          name: "动作节点",
           children: [],
           decisionType: _decisionType,
           decisionData: _decisionData,
@@ -1060,6 +1111,23 @@ export default {
       // });
       // // item.update(model, null);
       // item.draw();
+    },
+    /**
+     * 改變了新增編輯對話框裏的節點類型
+     * @param nodeType 改變的是什麽的節點類型
+     */
+    changeDataType(nodeType) {
+      switch (nodeType) {
+        case "parameter":
+          this.operateDialogData.parameter.value = null;
+          break;
+        case "compare":
+          this.operateDialogData.compare.value = null;
+          break;
+
+        default:
+          break;
+      }
     },
   },
 };
