@@ -19,7 +19,7 @@ export default {
 #app {
   padding: 0px;
   margin: 0px;
-  width: 100vw;
-  height: 100vh;
+  width: 90vw;
+  height: 90vh;
 }
 </style>

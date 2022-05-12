@@ -1,5 +1,5 @@
 <template>
-  <div class="component-container">
+  <div class="component-container" ref="treeGraphContainerFather">
     <div
       class="decision-tree"
       id="treeGraphContainer"
@@ -216,8 +216,8 @@ export default {
       // 圖譜相關的數據
       graph: null,
       defaultConfig: {
-        width: 1200,
-        height: 800,
+        width: 100,
+        height: 100,
         modes: {
           default: ["zoom-canvas", "drag-canvas"],
         },
@@ -355,23 +355,26 @@ export default {
   mounted() {
     this.registerFn();
 
-    const tgContainer = this.$refs["treeGraphContainer"];
-    const width = tgContainer.scrollWidth;
-    // const height = tgContainer.scrollHeight || 500;
+    const tgContainer = this.$refs["treeGraphContainerFather"];
+    const width = tgContainer.clientWidth;
+    const height = tgContainer.clientHeight;
     this.defaultConfig.width = width;
-    this.defaultConfig.height = 800;
+    this.defaultConfig.height = height;
 
     this.initGraph(mockData2);
 
-    // if (typeof window !== "undefined")
-    //   window.onresize = () => {
-    //     console.log("resize");
-    //     // eslint-disable-next-line no-debugger
-    //     if (!this.graph || this.graph.get("destroyed")) return;
-    //     if (!container || !container.scrollWidth || !container.scrollHeight)
-    //       return;
-    //     this.graph.changeSize(container.scrollWidth, container.scrollHeight);
-    //   };
+    if (typeof window !== "undefined") {
+
+      window.onresize = () => {
+        console.log("resize");
+        // eslint-disable-next-line no-debugger
+        if (!this.graph || this.graph.get("destroyed")) return;
+        if (!tgContainer || !tgContainer.clientWidth || !tgContainer.clientHeight)
+          return;
+        console.log("[tgContainer.clientWidth, tgContainer.clientHeight]->", tgContainer.clientWidth, tgContainer.clientHeight);
+        this.graph.changeSize(tgContainer.clientWidth, tgContainer.clientHeight);
+      };
+        }
     this.graphFitCenter();
   },
   methods: {
@@ -1150,12 +1153,12 @@ export default {
 
 <style scoped lang="scss">
 .component-container {
-  padding: 10px 0px 0px 10px;
+  width: 100%;
+  height: 100%;
   .decision-tree {
-    width: 90vw;
-    height: 800px;
+    overflow: hidden;
     border: 1px solid rgb(0, 145, 255);
-    border-radius: 6px;
+    // border-radius: 6px;
   }
   .detail-dialog {
     .detail-dialog-content {
